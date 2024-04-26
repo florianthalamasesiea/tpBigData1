@@ -14,7 +14,7 @@ fs.readdir(path.join("C:\\Users\\flomm\\OneDrive\\Bureau\\NodePourTP\\output\\")
     run(allFilesNames,4);// 2 = NOMBRE DE THREAD
 });
 
-// LOGIQUE WORKER TOUSSA TOUSSAa
+// LOGIQUE WORKER
     function chunkify(tousLesFichiers,n){
         let chunks = [];
         for (let i = n; i > 0; i--) {
@@ -33,4 +33,4 @@ fs.readdir(path.join("C:\\Users\\flomm\\OneDrive\\Bureau\\NodePourTP\\output\\")
             });
         });
     }
-// LOGIQUE WORKER TOUSSA TOUSSA
+// LOGIQUE WORKER
