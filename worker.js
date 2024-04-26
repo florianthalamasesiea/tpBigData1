@@ -31,7 +31,7 @@ const CSVToArray = (data, delimiter = ',', omitFirstRow = false) =>
 parentPort.on('message', (csvEntreprises) => {
   var listeNouvelleEntreprise = [];
     csvEntreprises.forEach(csvEntreprise => {
-      if (listeNouvelleEntreprise.length > 500) {
+      if (listeNouvelleEntreprise.length > 50000) {
         console.log("test");
         Entreprise.create(listeNouvelleEntreprise);
         listeNouvelleEntreprise = [];
@@ -46,7 +46,7 @@ parentPort.on('message', (csvEntreprises) => {
           entreprises.forEach(donneesEntreprise => {
             if (donneesEntreprise[0] != "siren") {
               
-                var a = new Entreprise({ 
+                listeNouvelleEntreprise.push(Entreprise({ 
                   siren : donneesEntreprise[0], 
                   nic : donneesEntreprise[1], 
                   siret : donneesEntreprise[2], 
@@ -59,9 +59,7 @@ parentPort.on('message', (csvEntreprises) => {
                   codeCommuneEtablissement : donneesEntreprise[22], 
                   dateDebut : donneesEntreprise[44],
                   etatAdministratifEtablissement : donneesEntreprise[45]
-                });
-                a.save();
-                
+                }));
             };
           });
         });
