@@ -1,9 +1,9 @@
-var fs = require('fs');
-const { connect, Schema, model } = require('mongoose');
-const { log } = require("console");
- const {parentPort} = require("worker_threads");
- connect('mongodb://127.0.0.1:27017/tpFranceV2');
+const fs = require('fs');
+const mongoose = require('mongoose');
+const { Schema } = mongoose;
+const { parentPort } = require("worker_threads");
 
+// Define entreprise schema
 const entrepriseSchema = new Schema({
     siren: Number,
     nic: Number,
@@ -17,53 +17,58 @@ const entrepriseSchema = new Schema({
     codeCommuneEtablissement: String,
     dateDebut: Date,
     etatAdministratifEtablissement: String
-  });
+});
 
-const Entreprise = model("Entreprise", entrepriseSchema);
+// Create a Mongoose model based on the schema
+const Entreprise = mongoose.model('Entreprise', entrepriseSchema);
 
+// Connect to your MongoDB database
+mongoose.connect('mongodb://localhost:27017/tpFrance', {
+    useNewUrlParser: true,
+    useUnifiedTopology: true
+})
+    .then(() => {
+        console.log('Connected to MongoDB');
+        // Handle incoming CSV data
+        parentPort.on('message', async (csvEntreprises) => {
+            try {
+                // Read CSV files and insert data
+                for (const csvEntreprise of csvEntreprises) {
+                    const fileData = fs.readFileSync('C:\\Users\\flomm\\OneDrive\\Bureau\\NodePourTP\\output\\' + csvEntreprise, 'utf-8');
+                    const lines = fileData.split(/\r?\n/);
+                    const entreprises = lines.map(line => line.split(','));
 
-const CSVToArray = (data, delimiter = ',', omitFirstRow = false) =>
-  data
-    .slice(omitFirstRow ? data.indexOf('\n') + 1 : 0)
-    .split('\n')
-    .map(v => v.split(delimiter));
+                    const entreprisesToInsert = [];
+                    for (const donneesEntreprise of entreprises) {
+                        if (donneesEntreprise[0] !== "siren") {
+                            entreprisesToInsert.push({
+                                siren: donneesEntreprise[0],
+                                nic: donneesEntreprise[1],
+                                siret: donneesEntreprise[2],
+                                dateCreationEtablissement: donneesEntreprise[4],
+                                dateDernierTraitementEtablissement: donneesEntreprise[8],
+                                typeVoieEtablissement: donneesEntreprise[16],
+                                libelleVoieEtablissement: donneesEntreprise[17],
+                                codePostalEtablissement: donneesEntreprise[18],
+                                libelleCommuneEtablissement: donneesEntreprise[19],
+                                codeCommuneEtablissement: donneesEntreprise[22],
+                                dateDebut: donneesEntreprise[44],
+                                etatAdministratifEtablissement: donneesEntreprise[45]
+                            });
+                        }
+                    }
 
-parentPort.on('message', (csvEntreprises) => {
-  var listeNouvelleEntreprise = [];
-    csvEntreprises.forEach(csvEntreprise => {
-      if (listeNouvelleEntreprise.length > 50000) {
-        console.log("test");
-        Entreprise.create(listeNouvelleEntreprise);
-        listeNouvelleEntreprise = [];
-        console.log("test2");
-      }
-
-        var a = fs.readFileSync('C:\\Users\\flomm\\OneDrive\\Bureau\\NodePourTP\\output\\' + csvEntreprise, 'utf-8') ;
-        var ensembleDocument = a.split(/\r?\n/);
-
-        ensembleDocument.forEach(element => {
-          let entreprises = CSVToArray(element);
-          entreprises.forEach(donneesEntreprise => {
-            if (donneesEntreprise[0] != "siren") {
-              
-                listeNouvelleEntreprise.push(Entreprise({ 
-                  siren : donneesEntreprise[0], 
-                  nic : donneesEntreprise[1], 
-                  siret : donneesEntreprise[2], 
-                  dateCreationEtablissement : donneesEntreprise[4], 
-                  dateDernierTraitementEtablissement : donneesEntreprise[8], 
-                  typeVoieEtablissement : donneesEntreprise[16], 
-                  libelleVoieEtablissement : donneesEntreprise[17], 
-                  codePostalEtablissement : donneesEntreprise[18], 
-                  libelleCommuneEtablissement : donneesEntreprise[19], 
-                  codeCommuneEtablissement : donneesEntreprise[22], 
-                  dateDebut : donneesEntreprise[44],
-                  etatAdministratifEtablissement : donneesEntreprise[45]
-                }));
-            };
-          });
+                    await Entreprise.insertMany(entreprisesToInsert);
+                    console.log('Objects inserted successfully:', entreprisesToInsert.length);
+                }
+            } catch (error) {
+                console.error('Error processing CSV data:', error);
+            } finally {
+                // Notify the parent thread that processing is done
+                parentPort.postMessage('done');
+            }
         });
-      });
-    console.log(listeNouvelleEntreprise.length);
-});    
-parentPort.postMessage('done');
+    })
+    .catch((err) => {
+        console.error('Error connecting to MongoDB:', err);
+    });
