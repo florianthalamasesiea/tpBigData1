@@ -23,18 +23,16 @@ const entrepriseSchema = new Schema({
 const Entreprise = mongoose.model('Entreprise', entrepriseSchema);
 
 // Connect to your MongoDB database
-mongoose.connect('mongodb://localhost:27017/tpFrance', {
-    useNewUrlParser: true,
-    useUnifiedTopology: true
-})
+mongoose.connect('mongodb://localhost:27017/tpFrance')
     .then(() => {
-        console.log('Connected to MongoDB');
+        console.log('Connexion à MongoDB');
         // Handle incoming CSV data
         parentPort.on('message', async (csvEntreprises) => {
             try {
                 // Read CSV files and insert data
                 for (const csvEntreprise of csvEntreprises) {
-                    const fileData = fs.readFileSync('C:\\Users\\flomm\\OneDrive\\Bureau\\NodePourTP\\output\\' + csvEntreprise, 'utf-8');
+                    console.time(`Fichier indexé ${csvEntreprise} en`); // Start timing before reading the file
+                    const fileData = fs.readFileSync('output\\' + csvEntreprise, 'utf-8');
                     const lines = fileData.split(/\r?\n/);
                     const entreprises = lines.map(line => line.split(','));
 
@@ -59,10 +57,10 @@ mongoose.connect('mongodb://localhost:27017/tpFrance', {
                     }
 
                     await Entreprise.insertMany(entreprisesToInsert);
-                    console.log('Objects inserted successfully:', entreprisesToInsert.length);
+                    console.timeEnd(`Fichier indexé ${csvEntreprise} en`); // End timing after processing the file
                 }
             } catch (error) {
-                console.error('Error processing CSV data:', error);
+                console.error('Erreur lors du traitement du CSV :', error);
             } finally {
                 // Notify the parent thread that processing is done
                 parentPort.postMessage('done');
@@ -70,5 +68,5 @@ mongoose.connect('mongodb://localhost:27017/tpFrance', {
         });
     })
     .catch((err) => {
-        console.error('Error connecting to MongoDB:', err);
+        console.error('Erreur lors de la connexion à MongoDB:', err);
     });
