@@ -1,8 +1,9 @@
-# tpBigData1
+# TP Big Data
 
 ## Description
 
-Ce projet a été développé dans le cadre d'un travail pratique sur le traitement de grandes données (Big Data) avec Node.js et MongoDB. Il implémente des techniques de multithreading à travers des "worker threads" pour optimiser le traitement des fichiers CSV contenant des données d'entreprise.
+Ce projet a été développé dans le cadre d'un TP sur le traitement de grandes données (Big Data) avec Node.js et MongoDB. 
+Il implémente du multithreading à grâcé à des "workers" pour optimiser le traitement de fichiers CSV venant d'une base de données SIRENE des entreprise françaises.
 
 ## Fonctionnalités
 
@@ -15,20 +16,24 @@ Ce projet a été développé dans le cadre d'un travail pratique sur le traitem
 - Node.js
 - MongoDB
 - Mongoose
-- worker_threads
+- PM2
 
 ## Prérequis
 
-Pour exécuter ce projet, vous devez avoir installé les éléments suivants sur votre système :
 - Node.js
-- npm (Node Package Manager)
 - MongoDB
 
 ## Installation
 
-Pour mettre en place le projet localement, suivez les étapes ci-dessous :
-
-```bash
 git clone https://github.com/florianthalamasesiea/tpBigData1.git
 cd tpBigData1
 npm install
+
+## Lancer le projet
+node .
+node index.js
+pm2 start index.js
+
+## Lancer le parseur csv
+node csvparser.js
+pm2 start csvparser.js
