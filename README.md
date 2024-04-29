@@ -25,15 +25,15 @@ Il implémente du multithreading à grâcé à des "workers" pour optimiser le t
 
 ## Installation
 
-git clone https://github.com/florianthalamasesiea/tpBigData1.git
-cd tpBigData1
-npm install
+- git clone https://github.com/florianthalamasesiea/tpBigData1.git
+- cd tpBigData1
+- npm install
 
 ## Lancer le projet
-node .
-node index.js
-pm2 start index.js
+- node .
+- node index.js
+- pm2 start index.js
 
 ## Lancer le parseur csv
-node csvparser.js
-pm2 start csvparser.js
+- node csvparser.js
+- pm2 start csvparser.js
